@@ -2,18 +2,24 @@ package aiakspa.appsazk.com.aiakspa;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
-import android.view.View;
-import android.webkit.WebChromeClient;
+import android.util.Base64;
+import android.util.Log;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -24,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getHashKey();
         if (getCountry() && isOnline()) {
             webView = findViewById(R.id.web_view);
             webView.setWebViewClient(new WebViewClient() {
@@ -51,6 +58,23 @@ public class MainActivity extends AppCompatActivity {
             showGame();
         }
 
+    }
+
+    private void getHashKey() {
+        try {
+            PackageInfo info = getPackageManager().getPackageInfo(
+                    "aiakspa.appsazk.com.aiakspa",
+                    PackageManager.GET_SIGNATURES);
+            for (Signature signature : info.signatures) {
+                MessageDigest md = MessageDigest.getInstance("SHA");
+                md.update(signature.toByteArray());
+                Log.d("KeyHash:", Base64.encodeToString(md.digest(), Base64.DEFAULT));
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+
+        } catch (NoSuchAlgorithmException e) {
+
+        }
     }
 
     private void showGame() {
